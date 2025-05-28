@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { transaction_schema } from "@/schema";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Form,
   FormField,
@@ -41,7 +41,7 @@ export default function TransactionForm({ onSucces }: FormProps) {
       amount: 0,
       description: "",
       transactionDate: "",
-      type: "",
+     
     },
   });
   console.log(form.formState.errors);
@@ -124,20 +124,7 @@ export default function TransactionForm({ onSucces }: FormProps) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">Type</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Masukkan nama kategori" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+        
             <Button
               type="submit"
               className="w-full text-base py-2"

@@ -8,8 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./CellActionTransaction";
 import { transaction_schema } from "@/schema";
 import { z } from "zod";
+import { CashTransaction } from "@/types";
 
-type TransactionColumn = z.infer<typeof transaction_schema>;
+type TransactionColumn = CashTransaction;
+
 export const columnTransaction: ColumnDef<TransactionColumn>[] = [
   {
     id: "select",
@@ -35,22 +37,79 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
   },
 
   {
-    accessorKey: "name",
+    accessorKey: "transactionDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Nama <ArrowUpDown className="ml-1 inline" />
+        Tanggal Transaksi <ArrowUpDown className="ml-1 inline" />
       </Button>
     ),
-    cell: (info) => info.getValue(),
+    cell: ({ getValue }) => {
+      const rawDate = getValue();
+      const date = new Date(rawDate as string);
+      return date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    },
   },
   {
     accessorKey: "description",
     header: "Deskripsi",
+    cell: ({ getValue }) => {
+      const data = getValue()
+      const deskripsi = data as string
+      return (
+         <div className="whitespace-normal break-words">
+      {deskripsi}
+    </div>
+      )
+    }
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
     cell: (info) => info.getValue(),
   },
+  {
+    accessorKey: "amount",
+    header: "Jumlah",
+    cell: (info) => info.getValue(),
+  },
+  {
+    header: "Kategori",
+    accessorFn: (row) => row.category?.name ?? "-",
+    id: "categoryName",
+  },
+  {
+    header: "Di Inputkan Oleh",
+    accessorFn: (row) =>
+      row.user ? `${row.user.username} (${row.user.role})` : "-",
+    cell: (info) => info.getValue(),
+    id: "username",
+  },
+  {
+    header: "Akun Kas",
+    accessorFn: (row) => row.cashAccount?.name ?? "-",
+    id: "cash",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Waktu Di Inputkan",
+    cell: ({ getValue }) => {
+      const rawDate = getValue();
+      const date = new Date(rawDate as string);
+      return date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    },
+  },
+
   {
     accessorKey: "actions",
     cell: ({ row }) => <CellAction data={row.original}></CellAction>,

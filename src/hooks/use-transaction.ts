@@ -3,8 +3,9 @@ import instance from "@/lib/axios";
 import { transaction_schema } from "@/schema";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import {  CashTransaction } from "@/types";
 
-type Transaction = z.infer<typeof transaction_schema>;
+type Transaction = CashTransaction;
 interface TransactionState {
   data: Transaction[];
   fetchData: () => Promise<void>;
@@ -14,7 +15,7 @@ export const useTransactionStore = create<TransactionState>((set) => ({
   data: [],
   fetchData: async () => {
     try {
-      const res = await instance.get("/api/categories");
+      const res = await instance.get("/cash-transaction");
       set({ data: res.data.data });
     } catch (e) {
       console.log(e);
