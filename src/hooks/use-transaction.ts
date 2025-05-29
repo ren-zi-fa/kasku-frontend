@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import instance from "@/lib/axios";
-import { transaction_schema } from "@/schema";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import {  CashTransaction } from "@/types";
 
 type Transaction = CashTransaction;
@@ -33,7 +31,7 @@ export function useTransactionById(id: string | undefined) {
     setLoading(true);
     setError(null);
     instance
-      .get(`/api/categories/${id}`)
+      .get(`/cash-transaction/${id}`)
       .then((res) => setTransaction(res.data.data))
       .catch((err) => setError(`Gagal mengambil kategori ${err} `))
       .finally(() => setLoading(false));

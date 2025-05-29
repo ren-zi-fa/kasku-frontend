@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { toast } from "sonner";
-import { z } from "zod";
-import { transaction_schema } from "@/schema";
 import { CashTransaction } from "@/types";
 
 type TransactionColumn = CashTransaction;

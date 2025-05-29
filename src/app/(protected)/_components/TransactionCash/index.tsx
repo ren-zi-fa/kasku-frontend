@@ -13,12 +13,12 @@ export default function DataTransactionCash() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-  console.log("data from front", data);
+
   return (
     <>
-      <TransactionForm onSucces={fetchData} />
       {data && (
         <DataTable
+          createForm={<TransactionForm onSucces={fetchData} />}
           searchkey="description"
           deleteBulkEndpoint="/api/categories/bulk-delete"
           data={data}

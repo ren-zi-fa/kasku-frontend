@@ -1,13 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./CellActionTransaction";
-import { transaction_schema } from "@/schema";
-import { z } from "zod";
 import { CashTransaction } from "@/types";
 
 type TransactionColumn = CashTransaction;
@@ -60,14 +57,10 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
     accessorKey: "description",
     header: "Deskripsi",
     cell: ({ getValue }) => {
-      const data = getValue()
-      const deskripsi = data as string
-      return (
-         <div className="whitespace-normal break-words">
-      {deskripsi}
-    </div>
-      )
-    }
+      const data = getValue();
+      const deskripsi = data as string;
+      return <div className="whitespace-normal break-words">{deskripsi}</div>;
+    },
   },
   {
     accessorKey: "type",
@@ -80,10 +73,11 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
     cell: (info) => info.getValue(),
   },
   {
-    header: "Kategori",
+    header: "Category ",
     accessorFn: (row) => row.category?.name ?? "-",
     id: "categoryName",
   },
+
   {
     header: "Di Inputkan Oleh",
     accessorFn: (row) =>
