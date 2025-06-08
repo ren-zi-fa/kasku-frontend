@@ -22,6 +22,7 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
         aria-label="Select all"
       />
     ),
+
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
@@ -32,9 +33,14 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+  {
+    header: "No ",
+    cell: ({ row }) => row.index + 1,
+    id: "id",
+  },
 
   {
-    accessorKey: "transactionDate",
+    accessorKey: "transaction_date",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -74,7 +80,7 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
   },
   {
     header: "Category ",
-    accessorFn: (row) => row.category?.name ?? "-",
+    accessorFn: (row) => row.transaction_category?.name ?? "-",
     id: "categoryName",
   },
 
@@ -87,11 +93,11 @@ export const columnTransaction: ColumnDef<TransactionColumn>[] = [
   },
   {
     header: "Akun Kas",
-    accessorFn: (row) => row.cashAccount?.name ?? "-",
+    accessorFn: (row) => row.cash_account?.name ?? "-",
     id: "cash",
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: "Waktu Di Inputkan",
     cell: ({ getValue }) => {
       const rawDate = getValue();

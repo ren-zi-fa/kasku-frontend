@@ -25,17 +25,24 @@ export interface TransactionCategory {
 export interface CashTransaction {
   id: number;
   description: string;
-  transactionDate: string;
+  transaction_date: string;
   type: string;
-  createdAt: string;
+  created_at: string;
   amount: string;
   user: User | null;
-  cashAccount: CashAccount | null;
-  category: TransactionCategory | null;
+  cash_account: CashAccount | null;
+  transaction_category: TransactionCategory | null;
 }
 
 export interface ApiResponse<T> {
   success: boolean;
-  data: T;
   message: string;
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    pageCount: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }

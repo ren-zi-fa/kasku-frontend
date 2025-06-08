@@ -1,3 +1,4 @@
+"use client"
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import DataTransactionCash from "../../_components/TransactionCash";
 

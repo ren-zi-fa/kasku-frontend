@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
@@ -16,7 +17,6 @@ import {
 import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -37,70 +37,82 @@ import { toast } from "sonner";
 import axios from "axios";
 import AlertModal from "./AlertModal";
 import instance from "@/lib/axios";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { ApiResponse } from "@/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
   searchkey: string;
   deleteBulkEndpoint?: string;
-  onRefresh?: () => void;
+  fetchData: (pagination: PaginationState) => Promise<ApiResponse<TData>>;
   dataAddition?: React.ReactNode;
   createForm?: React.ReactNode;
+  pagination: PaginationState;
+  setPagination: React.Dispatch<React.SetStateAction<PaginationState>>;
 }
 
+const queryClient = new QueryClient();
+
 export function DataTable<TData, TValue>({
-  data,
   columns,
   searchkey,
   deleteBulkEndpoint,
   dataAddition,
   createForm,
-  onRefresh,
+  pagination,
+  setPagination,
+  fetchData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [openDelete, setOpenDelete] = React.useState(false);
+
+  const { data: serverData, isLoading } = useQuery({
+    queryKey: ["transactions", pagination],
+    queryFn: () => fetchData(pagination),
+    placeholderData: (prev) => prev,
+  });
 
   const table = useReactTable({
-    data,
+    data: serverData?.data ?? [],
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
+    pageCount: Math.ceil((serverData?.meta?.total ?? 0) / pagination.pageSize),
+    onPaginationChange: setPagination,
+    manualPagination: true,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
-
-  const [openDelete, setOpenDelete] = React.useState(false);
 
   const handleBulkDelete = async () => {
     try {
       await instance.delete(`${deleteBulkEndpoint}`);
-      toast.success("data berhasil di hapus");
+      toast.success("Data berhasil dihapus");
       setOpenDelete(false);
-      onRefresh?.();
+      fetchData(pagination);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const msg =
           error.response?.data?.message || error.message || "Unknown error";
-        toast.error("Gagal menyimpan produk: " + msg);
+        toast.error("Gagal menghapus data: " + msg);
       } else {
-        toast.error("Gagal menyimpan produk: Unknown error");
+        toast.error("Gagal menghapus data: Unknown error");
       }
     }
   };
@@ -108,17 +120,6 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full">
       <div className="flex items-center py-4 space-x-4">
-        {/* {deleteBulkEndpoint && (
-               <Button
-                  variant="destructive"
-                  className="mr-4"
-              
-                  onClick={() => setOpenDelete(true)}
-               >
-                  Hapus
-               </Button>
-            )} */}
-
         <Input
           placeholder="Search..."
           value={(table.getColumn(searchkey)?.getFilterValue() as string) ?? ""}
@@ -127,8 +128,8 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        {createForm && <>{createForm}</>}
-        {dataAddition && <>{dataAddition}</>}
+        {createForm && createForm}
+        {dataAddition && dataAddition}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -140,27 +141,23 @@ export function DataTable<TData, TValue>({
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border max-w-sm md:max-w-full overflow-hidden">
+
+      <div className="rounded-md border max-w-lg mx-auto md:max-w-full overflow-hidden">
         <div className="w-full overflow-x-auto">
-          <Table className="min-w-[600px]">
-            {/* tambahkan lebar minimum jika perlu */}
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -233,11 +230,11 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
+
       <AlertModal
         handleBulkDelete={handleBulkDelete}
         setOpenDelete={setOpenDelete}
         openDelete={openDelete}
-        // selectedIds={selectedIds}
       />
     </div>
   );

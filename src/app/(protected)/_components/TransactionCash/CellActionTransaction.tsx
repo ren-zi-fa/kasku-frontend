@@ -22,7 +22,7 @@ interface CellActionProps {
 
 const CellAction = ({ data }: CellActionProps) => {
   const onCopy = () => {
-    navigator.clipboard.writeText(data.transactionDate);
+    navigator.clipboard.writeText(data.transaction_date);
     toast.success("Transaction Copied Successfully");
   };
   return (
